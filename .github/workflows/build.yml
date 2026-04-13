@@ -9,51 +9,50 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install XcodeGen
         run: brew install xcodegen
 
       - name: Prepare extension
         run: |
-          if [ ! -f extension_latest.zip ]; then
-            echo "extension_latest.zip NOT FOUND"
-            exit 1
-          fi
-
           rm -rf extension
           mkdir extension
           unzip extension_latest.zip -d extension
 
-      - name: Fix structure (optional)
+      - name: Fix structure
         run: |
           mv extension/*/* extension/ 2>/dev/null || true
 
-      - name: Generate Xcode project
+      - name: Add ExtensionHandler
+        run: |
+          cat > extension/ExtensionHandler.swift << 'EOF'
+          import SafariServices
+
+          class ExtensionHandler: NSObject, NSExtensionRequestHandling {
+              func beginRequest(with context: NSExtensionContext) {
+                  context.completeRequest(returningItems: nil, completionHandler: nil)
+              }
+          }
+          EOF
+
+      - name: Generate project
         run: xcodegen generate
 
-      - name: Build app
+      - name: Build
         run: |
           xcodebuild \
             -scheme WrapperApp \
             -sdk iphoneos \
             -configuration Release \
-            CODE_SIGNING_ALLOWED=NO \
             CONFIGURATION_BUILD_DIR=build \
+            CODE_SIGNING_ALLOWED=NO \
             build
 
       - name: Package IPA
         run: |
-          mkdir -p Payload
-          APP_PATH=$(find build -name "*.app" | head -n 1)
-
-          if [ -z "$APP_PATH" ]; then
-            echo "No .app found"
-            exit 1
-          fi
-
-          cp -r "$APP_PATH" Payload/
+          mkdir Payload
+          cp -r build/*.app Payload/
           zip -r app.ipa Payload
 
       - name: Upload IPA
