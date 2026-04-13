@@ -8,13 +8,4 @@ targets:
       - path: .
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.example.wrapper
-
-  Extension:
-    type: app-extension
-    platform: iOS
-    sources:
-      - path: extension
-    settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.example.wrapper.extension
-    dependencies:
-      - target: WrapperApp
+      GENERATE_INFOPLIST_FILE: YES
