@@ -1,4 +1,4 @@
-name: Build iOS Wrapper
+name: Build iOS IPA
 
 on:
   push:
@@ -14,9 +14,6 @@ jobs:
 
       - name: Install XcodeGen
         run: brew install xcodegen
-
-      - name: Debug files
-        run: ls -la
 
       - name: Prepare extension
         run: |
@@ -43,14 +40,24 @@ jobs:
             -sdk iphoneos \
             -configuration Release \
             CODE_SIGNING_ALLOWED=NO \
+            CONFIGURATION_BUILD_DIR=build \
             build
 
-      - name: Find .app
+      - name: Package IPA
         run: |
-          find ~/Library/Developer/Xcode/DerivedData -name "*.app"
+          mkdir -p Payload
+          APP_PATH=$(find build -name "*.app" | head -n 1)
 
-      - name: Upload app
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found"
+            exit 1
+          fi
+
+          cp -r "$APP_PATH" Payload/
+          zip -r app.ipa Payload
+
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ios-app
-          path: ~/Library/Developer/Xcode/DerivedData/**/Release-iphoneos/*.app
+          name: ios-ipa
+          path: app.ipa
