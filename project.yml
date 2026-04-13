@@ -1,11 +1,32 @@
 name: WrapperApp
 
+options:
+  bundleIdPrefix: com.example
+
 targets:
   WrapperApp:
     type: application
     platform: iOS
     sources:
       - path: .
+        excludes:
+          - extension
+          - .git
+          - .github
+          - extension_latest.zip
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.example.wrapper
       GENERATE_INFOPLIST_FILE: YES
+      INFOPLIST_KEY_UIApplicationSceneManifest: {}
+      INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+
+  Extension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: extension
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.example.wrapper.extension
+      GENERATE_INFOPLIST_FILE: YES
+      INFOPLIST_KEY_NSExtension:
+        NSExtensionPointIdentifier: com.apple.Safari.web-extension
