@@ -49,10 +49,25 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
+      - name: Debug build output
+        run: |
+          echo "=== APPS ==="
+          find build -name "*.app"
+          echo "=== EXTENSIONS ==="
+          find build -name "*.appex"
+
       - name: Package IPA
         run: |
           mkdir Payload
-          cp -r build/*.app Payload/
+
+          APP_PATH=$(find build -name "*.app" | head -n 1)
+
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found"
+            exit 1
+          fi
+
+          cp -r "$APP_PATH" Payload/
           zip -r app.ipa Payload
 
       - name: Upload IPA
