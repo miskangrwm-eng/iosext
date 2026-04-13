@@ -15,8 +15,16 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      - name: Debug files
+        run: ls -la
+
       - name: Prepare extension
         run: |
+          if [ ! -f extension_latest.zip ]; then
+            echo "extension_latest.zip NOT FOUND"
+            exit 1
+          fi
+
           rm -rf extension
           mkdir extension
           unzip extension_latest.zip -d extension
@@ -37,8 +45,12 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
+      - name: Find .app
+        run: |
+          find ~/Library/Developer/Xcode/DerivedData -name "*.app"
+
       - name: Upload app
         uses: actions/upload-artifact@v4
         with:
           name: ios-app
-          path: build/Build/Products/Release-iphoneos/
+          path: ~/Library/Developer/Xcode/DerivedData/**/Release-iphoneos/*.app
