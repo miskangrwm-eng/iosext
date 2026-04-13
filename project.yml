@@ -20,6 +20,10 @@ targets:
       INFOPLIST_KEY_UIApplicationSceneManifest: {}
       INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
 
+    dependencies:
+      - target: Extension
+        embed: true
+
   Extension:
     type: app-extension
     platform: iOS
